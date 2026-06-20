@@ -6,6 +6,20 @@ import { findeBereichById, findeUebungById } from '../../data/uebungen';
 import { useTheme } from '../../context/ThemeContext';
 import { useFavoriten } from '../../context/FavoritenContext';
 import { useVersion } from '../../context/VersionContext';
+import { UebungAnimation } from '../../components/UebungAnimation';
+
+const UEBUNG_ANIMATIONEN: Record<string, React.ComponentProps<typeof UebungAnimation>> = {
+  'knie-01': {
+    ausgang: {
+      front: require('../../assets/exercises/squat_active_front.png'),
+      seite: require('../../assets/exercises/squat_active.png'),
+    },
+    endposition: {
+      front: require('../../assets/exercises/squat_standing_front.png'),
+      seite: require('../../assets/exercises/squat_standing.png'),
+    },
+  },
+};
 
 const SCHWIERIGKEIT_LABEL = ['', 'Leicht', 'Mittel', 'Anspruchsvoll'];
 const SCHWIERIGKEIT_FARBE = ['', '#27AE60', '#E8832A', '#E74C3C'];
@@ -85,6 +99,10 @@ export default function UebungDetailScreen() {
           )}
         </View>
       </View>
+
+      {UEBUNG_ANIMATIONEN[uebung.id] && (
+        <UebungAnimation {...UEBUNG_ANIMATIONEN[uebung.id]} />
+      )}
 
       <Section titel="Ausgangsposition" dark={dark} cardBg={cardBg} textPrimary={textPrimary} textSecondary={textSecondary}>
         <Text style={[styles.bodyText, { color: textSecondary }]}>{uebung.ausgangsposition}</Text>
