@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ThemePreference, useTheme } from '../../context/ThemeContext';
 import { AppVersion, useVersion, FREE_BEREICHE_IDS } from '../../context/VersionContext';
 
@@ -19,11 +19,9 @@ const PROFIL_EINTRAEGE = [
   { label: 'Therapeut:in', wert: 'Nicht angegeben' },
 ];
 
-const APP_EINTRAEGE = [
-  { label: 'Version', wert: '1.0.0' },
-  { label: 'App-Name', wert: 'MyRehaGuide' },
-  { label: 'Datenschutz', wert: '›' },
-  { label: 'Impressum', wert: '›' },
+const APP_LINKS: { label: string; url: string }[] = [
+  { label: 'Datenschutzerklärung', url: 'https://heinoxx.github.io/myrehaguide/datenschutz.html' },
+  { label: 'Impressum', url: 'https://heinoxx.github.io/myrehaguide/impressum.html' },
 ];
 
 export default function EinstellungenScreen() {
@@ -134,14 +132,23 @@ export default function EinstellungenScreen() {
 
       <Text style={[styles.abschnittTitel, { color: sectionLabel }]}>APP-INFORMATIONEN</Text>
       <View style={[styles.karte, { backgroundColor: cardBg }]}>
-        {APP_EINTRAEGE.map((e, i) => (
+        <View style={[styles.zeile, { borderBottomWidth: 0.5, borderBottomColor: separator }]}>
+          <Text style={[styles.zeileLabel, { color: textPrimary }]}>Version</Text>
+          <Text style={[styles.zeileWert, { color: textSecondary }]}>1.0.0</Text>
+        </View>
+        <View style={[styles.zeile, { borderBottomWidth: 0.5, borderBottomColor: separator }]}>
+          <Text style={[styles.zeileLabel, { color: textPrimary }]}>App-Name</Text>
+          <Text style={[styles.zeileWert, { color: textSecondary }]}>MyRehaGuide</Text>
+        </View>
+        {APP_LINKS.map((link, i) => (
           <TouchableOpacity
-            key={e.label}
-            style={[styles.zeile, i < APP_EINTRAEGE.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: separator }]}
+            key={link.label}
+            style={[styles.zeile, i < APP_LINKS.length - 1 && { borderBottomWidth: 0.5, borderBottomColor: separator }]}
             activeOpacity={0.6}
+            onPress={() => Linking.openURL(link.url)}
           >
-            <Text style={[styles.zeileLabel, { color: textPrimary }]}>{e.label}</Text>
-            <Text style={[styles.zeileWert, { color: textSecondary }]}>{e.wert}</Text>
+            <Text style={[styles.zeileLabel, { color: textPrimary }]}>{link.label}</Text>
+            <Text style={[styles.zeileWert, { color: activeBlue }]}>›</Text>
           </TouchableOpacity>
         ))}
       </View>
