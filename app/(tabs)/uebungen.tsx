@@ -5,12 +5,14 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { BEREICHE, findeUebungById } from '../../data/uebungen';
 import { useTheme } from '../../context/ThemeContext';
 import { useFavoriten } from '../../context/FavoritenContext';
+import { useVersion } from '../../context/VersionContext';
 
 export default function UebungenScreen() {
   const { bereich: bereichParam } = useLocalSearchParams<{ bereich?: string }>();
   const [offen, setOffen] = useState<string | null>(null);
   const { resolved } = useTheme();
   const { favoriten, istFavorit } = useFavoriten();
+  const { istBereichFrei, istUebungFrei } = useVersion();
   const router = useRouter();
 
   useEffect(() => {
@@ -68,43 +70,67 @@ export default function UebungenScreen() {
         </View>
       )}
 
-      {BEREICHE.map((bereich) => (
-        <View key={bereich.id} style={styles.bereichBlock}>
-          <TouchableOpacity
-            style={[styles.bereichHeader, { backgroundColor: cardBg, borderLeftColor: bereich.farbe }]}
-            onPress={() => setOffen(offen === bereich.id ? null : bereich.id)}
-            activeOpacity={0.75}
-          >
-            <Text style={[styles.bereichTitel, { color: textPrimary }]}>{bereich.titel}</Text>
-            <Text style={[styles.bereichMeta, { color: textSecondary }]}>
-              {bereich.uebungen.length} Übungen  {offen === bereich.id ? '▲' : '▼'}
-            </Text>
-          </TouchableOpacity>
+      {BEREICHE.map((bereich) => {
+        const bereichFrei = istBereichFrei(bereich.id);
+        const borderColor = bereichFrei ? bereich.farbe : (dark ? '#3A3A3C' : '#D1D1D6');
+        return (
+          <View key={bereich.id} style={styles.bereichBlock}>
+            <TouchableOpacity
+              style={[styles.bereichHeader, { backgroundColor: cardBg, borderLeftColor: borderColor, opacity: bereichFrei ? 1 : 0.55 }]}
+              onPress={() => {
+                if (bereichFrei) {
+                  setOffen(offen === bereich.id ? null : bereich.id);
+                } else {
+                  router.push({ pathname: '/paywall', params: { titel: bereich.titel, farbe: bereich.farbe } });
+                }
+              }}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.bereichTitel, { color: bereichFrei ? textPrimary : textSecondary }]}>{bereich.titel}</Text>
+              <View style={styles.bereichMetaZeile}>
+                {!bereichFrei && <Ionicons name="lock-closed" size={12} color={textSecondary} style={{ marginRight: 4 }} />}
+                <Text style={[styles.bereichMeta, { color: textSecondary }]}>
+                  {bereichFrei ? `${bereich.uebungen.length} Übungen` : 'Vollversion'}
+                  {'  '}{offen === bereich.id ? '▲' : '▼'}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
-          {offen === bereich.id && (
-            <View style={[styles.uebungListe, { backgroundColor: cardBg }]}>
-              {bereich.uebungen.map((u, i) => (
-                <TouchableOpacity
-                  key={u.id}
-                  style={[styles.uebungZeile, { borderBottomColor: separator }]}
-                  activeOpacity={0.6}
-                  onPress={() => router.push(`/uebung/${u.id}`)}
-                >
-                  <View style={[styles.nummerBadge, { backgroundColor: bereich.farbe }]}>
-                    <Text style={styles.nummerText}>{i + 1}</Text>
-                  </View>
-                  <Text style={[styles.uebungName, { color: textPrimary }]}>{u.titel}</Text>
-                  {istFavorit(u.id) && <Ionicons name="heart" size={13} color="#E74C3C" />}
-                  <Text style={[styles.schwierigkeitDot, {
-                    color: u.schwierigkeit === 1 ? '#27AE60' : u.schwierigkeit === 2 ? '#E8832A' : '#E74C3C'
-                  }]}>●</Text>
-                  <Text style={[styles.pfeil, { color: textSecondary }]}>›</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      ))}
+            {offen === bereich.id && (
+              <View style={[styles.uebungListe, { backgroundColor: cardBg }]}>
+                {bereich.uebungen.map((u, i) => {
+                  const uebungFrei = istUebungFrei(u.id);
+                  return (
+                    <TouchableOpacity
+                      key={u.id}
+                      style={[styles.uebungZeile, { borderBottomColor: separator, opacity: uebungFrei ? 1 : 0.5 }]}
+                      activeOpacity={uebungFrei ? 0.6 : 0.4}
+                      onPress={() => {
+                        if (uebungFrei) {
+                          router.push(`/uebung/${u.id}`);
+                        } else {
+                          router.push({ pathname: '/paywall', params: { titel: u.titel, farbe: bereich.farbe } });
+                        }
+                      }}
+                    >
+                      <View style={[styles.nummerBadge, { backgroundColor: uebungFrei ? bereich.farbe : (dark ? '#3A3A3C' : '#C7C7CC') }]}>
+                        <Text style={styles.nummerText}>{i + 1}</Text>
+                      </View>
+                      <Text style={[styles.uebungName, { color: uebungFrei ? textPrimary : textSecondary }]}>{u.titel}</Text>
+                      {uebungFrei && istFavorit(u.id) && <Ionicons name="heart" size={13} color="#E74C3C" />}
+                      {!uebungFrei
+                        ? <Ionicons name="lock-closed" size={13} color={dark ? '#636366' : '#AEAEB2'} />
+                        : <Text style={[styles.schwierigkeitDot, { color: u.schwierigkeit === 1 ? '#27AE60' : u.schwierigkeit === 2 ? '#E8832A' : '#E74C3C' }]}>●</Text>
+                      }
+                      <Text style={[styles.pfeil, { color: textSecondary }]}>›</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+        );
+      })}
     </ScrollView>
   );
 }
@@ -124,6 +150,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bereichTitel: { fontSize: 15, fontWeight: '700' },
+  bereichMetaZeile: { flexDirection: 'row', alignItems: 'center' },
   bereichMeta: { fontSize: 13 },
   uebungListe: { borderRadius: 10, marginTop: 2, overflow: 'hidden' },
   uebungZeile: {

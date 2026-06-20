@@ -1,6 +1,8 @@
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
+import { useVersion, FREE_BEREICHE_IDS } from '../../context/VersionContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const KATEGORIEN = [
   { id: 'ruecken',     titel: 'Rücken & LWS',    anzahl: 8,  farbe: '#4A90D9', verfuegbar: true },
@@ -21,6 +23,7 @@ const KATEGORIEN = [
 export default function HomeScreen() {
   const router = useRouter();
   const { resolved } = useTheme();
+  const { istBereichFrei } = useVersion();
   const dark = resolved === 'dark';
 
   const bg = dark ? '#1C1C1E' : '#F2F2F7';
@@ -55,27 +58,36 @@ export default function HomeScreen() {
       <Text style={[styles.sectionTitle, { color: textPrimary }]}>Übungsbereiche</Text>
 
       <View style={styles.grid}>
-        {KATEGORIEN.map((kat) => (
-          <TouchableOpacity
-            key={kat.id}
-            style={[
-              styles.karte,
-              { backgroundColor: cardBg, borderLeftColor: kat.verfuegbar ? kat.farbe : (dark ? '#3A3A3C' : '#D1D1D6') },
-              !kat.verfuegbar && styles.karteInaktiv,
-            ]}
-            activeOpacity={kat.verfuegbar ? 0.75 : 0.5}
-            onPress={() => {
-              if (kat.verfuegbar) {
-                router.push({ pathname: '/(tabs)/uebungen', params: { bereich: kat.id } });
-              }
-            }}
-          >
-            <Text style={[styles.karteTitel, { color: kat.verfuegbar ? textPrimary : textSecondary }]}>{kat.titel}</Text>
-            <Text style={[styles.karteAnzahl, { color: textSecondary }]}>
-              {kat.verfuegbar ? `${kat.anzahl} Übungen` : 'Demnächst'}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {KATEGORIEN.map((kat) => {
+          const frei = kat.verfuegbar && istBereichFrei(kat.id);
+          const gesperrt = kat.verfuegbar && !frei;
+          return (
+            <TouchableOpacity
+              key={kat.id}
+              style={[
+                styles.karte,
+                { backgroundColor: cardBg, borderLeftColor: frei ? kat.farbe : (dark ? '#3A3A3C' : '#D1D1D6') },
+                !frei && styles.karteInaktiv,
+              ]}
+              activeOpacity={frei ? 0.75 : 0.6}
+              onPress={() => {
+                if (frei) {
+                  router.push({ pathname: '/(tabs)/uebungen', params: { bereich: kat.id } });
+                } else if (gesperrt) {
+                  router.push({ pathname: '/paywall', params: { titel: kat.titel, farbe: kat.farbe } });
+                }
+              }}
+            >
+              <View style={styles.karteTitelZeile}>
+                <Text style={[styles.karteTitel, { color: frei ? textPrimary : textSecondary, flex: 1 }]}>{kat.titel}</Text>
+                {gesperrt && <Ionicons name="lock-closed" size={13} color={dark ? '#636366' : '#AEAEB2'} />}
+              </View>
+              <Text style={[styles.karteAnzahl, { color: textSecondary }]}>
+                {!kat.verfuegbar ? 'Demnächst' : frei ? `${FREE_BEREICHE_IDS.includes(kat.id) ? 3 : kat.anzahl} Übungen` : 'Vollversion'}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </ScrollView>
   );
@@ -121,6 +133,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   karteInaktiv: { opacity: 0.55 },
+  karteTitelZeile: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   karteTitel: { fontSize: 14, fontWeight: '600', lineHeight: 20 },
   karteAnzahl: { fontSize: 12, marginTop: 4 },
 });

@@ -1,5 +1,11 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ThemePreference, useTheme } from '../../context/ThemeContext';
+import { AppVersion, useVersion, FREE_BEREICHE_IDS } from '../../context/VersionContext';
+
+const VERSION_OPTIONEN: { wert: AppVersion; label: string }[] = [
+  { wert: 'free', label: 'Kostenlos' },
+  { wert: 'paid', label: 'Vollversion' },
+];
 
 const THEME_OPTIONEN: { wert: ThemePreference; label: string }[] = [
   { wert: 'system', label: 'System' },
@@ -22,6 +28,7 @@ const APP_EINTRAEGE = [
 
 export default function EinstellungenScreen() {
   const { preference, setPreference, resolved } = useTheme();
+  const { version, setVersion } = useVersion();
 
   const dark = resolved === 'dark';
   const bg = dark ? '#1C1C1E' : '#F2F2F7';
@@ -34,6 +41,47 @@ export default function EinstellungenScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={styles.content}>
+
+      <Text style={[styles.abschnittTitel, { color: sectionLabel }]}>VERSION</Text>
+      <View style={[styles.karte, { backgroundColor: cardBg }]}>
+        <View style={[styles.zeile, { borderBottomWidth: 0.5, borderBottomColor: separator }]}>
+          <Text style={[styles.zeileLabel, { color: textPrimary }]}>App-Version</Text>
+          <Text style={[styles.zeileWert, { color: version === 'paid' ? '#27AE60' : '#E8832A' }]}>
+            {version === 'paid' ? 'Vollversion' : 'Kostenlos'}
+          </Text>
+        </View>
+        <View style={[styles.zeile, { flexDirection: 'column', alignItems: 'flex-start', gap: 10 }]}>
+          <Text style={[styles.zeileLabel, { color: textPrimary }]}>Version wechseln</Text>
+          <View style={styles.segmentContainer}>
+            {VERSION_OPTIONEN.map((opt) => {
+              const aktiv = version === opt.wert;
+              return (
+                <TouchableOpacity
+                  key={opt.wert}
+                  style={[
+                    styles.segmentButton,
+                    aktiv && { backgroundColor: activeBlue },
+                    !aktiv && { backgroundColor: dark ? '#3A3A3C' : '#E5E5EA' },
+                  ]}
+                  onPress={() => setVersion(opt.wert)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.segmentLabel, { color: aktiv ? '#FFFFFF' : textSecondary }]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+        {version === 'free' && (
+          <View style={[styles.versionHinweis, { backgroundColor: dark ? '#0F2A3A' : '#E8F4FD' }]}>
+            <Text style={[styles.versionHinweisText, { color: dark ? '#7AB8D4' : '#1A5276' }]}>
+              Kostenlos: {FREE_BEREICHE_IDS.length} Bereiche, je 3 Übungen (leicht / mittel / schwer).{'\n'}Signal for Help immer verfügbar.
+            </Text>
+          </View>
+        )}
+      </View>
 
       <Text style={[styles.abschnittTitel, { color: sectionLabel }]}>PROFIL</Text>
       <View style={[styles.karte, { backgroundColor: cardBg }]}>
@@ -146,6 +194,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  versionHinweis: { margin: 12, marginTop: 0, borderRadius: 8, padding: 10 },
+  versionHinweisText: { fontSize: 12, lineHeight: 18 },
   footer: {
     fontSize: 12,
     textAlign: 'center',

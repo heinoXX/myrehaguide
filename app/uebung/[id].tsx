@@ -5,6 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { findeBereichById, findeUebungById } from '../../data/uebungen';
 import { useTheme } from '../../context/ThemeContext';
 import { useFavoriten } from '../../context/FavoritenContext';
+import { useVersion } from '../../context/VersionContext';
 
 const SCHWIERIGKEIT_LABEL = ['', 'Leicht', 'Mittel', 'Anspruchsvoll'];
 const SCHWIERIGKEIT_FARBE = ['', '#27AE60', '#E8832A', '#E74C3C'];
@@ -17,6 +18,7 @@ export default function UebungDetailScreen() {
 
   const { top } = useSafeAreaInsets();
   const { istFavorit, toggleFavorit } = useFavoriten();
+  const { istUebungFrei } = useVersion();
   const uebung = findeUebungById(id ?? '');
   const bereich = uebung ? findeBereichById(uebung.bereichId) : undefined;
 
@@ -39,6 +41,11 @@ export default function UebungDetailScreen() {
 
   const schwFarbe = SCHWIERIGKEIT_FARBE[uebung.schwierigkeit];
   const schwLabel = SCHWIERIGKEIT_LABEL[uebung.schwierigkeit];
+
+  if (!istUebungFrei(uebung.id)) {
+    router.replace({ pathname: '/paywall', params: { titel: uebung.titel, farbe: bereich.farbe } });
+    return null;
+  }
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: bg }]} contentContainerStyle={[styles.content, { paddingTop: top + 12 }]}>

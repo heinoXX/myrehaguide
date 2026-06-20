@@ -38,14 +38,6 @@ export default function SignalScreen() {
       </View>
 
       <View style={[styles.card, { backgroundColor: cardBg }]}>
-        <Text style={[styles.cardTitle, { color: textPrimary }]}>Was ist das Signal for Help?</Text>
-        <Text style={[styles.cardText, { color: textSecondary }]}>
-          Ein internationales Handzeichen für einen stillen Hilferuf — für Menschen, die nicht laut um Hilfe rufen können oder dürfen, weil eine gefährliche Person anwesend ist.{'\n\n'}
-          Entwickelt 2020 von der Canadian Women's Foundation, heute weltweit von Polizei, Frauenhäusern und Schulen empfohlen.
-        </Text>
-      </View>
-
-      <View style={[styles.card, { backgroundColor: cardBg }]}>
         <Text style={[styles.cardTitle, { color: textPrimary }]}>Das Handzeichen — Schritt für Schritt</Text>
         <Image
           source={require('../../assets/signal-for-help.png')}
@@ -100,6 +92,14 @@ export default function SignalScreen() {
       <Text style={[styles.quelle, { color: dark ? '#636366' : '#AEAEB2' }]}>
         Quelle: Canadian Women's Foundation (2020); Polizeiliche Kriminalprävention der Länder und des Bundes
       </Text>
+
+      <View style={[styles.card, { backgroundColor: cardBg, marginTop: 4 }]}>
+        <Text style={[styles.cardTitle, { color: textPrimary }]}>Was ist das Signal for Help?</Text>
+        <Text style={[styles.cardText, { color: textSecondary }]}>
+          Ein internationales Handzeichen für einen stillen Hilferuf — für Menschen, die nicht laut um Hilfe rufen können oder dürfen, weil eine gefährliche Person anwesend ist.{'\n\n'}
+          Entwickelt 2020 von der Canadian Women's Foundation, heute weltweit von Polizei, Frauenhäusern und Schulen empfohlen.
+        </Text>
+      </View>
     </ScrollView>
   );
 }
