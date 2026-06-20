@@ -29,6 +29,13 @@
     "plugins": [
       "expo-router",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3ddc22b8-b8fc-48e3-b2fb-802b88da6a2c"
+      }
+    },
+    "owner": "heinoesser"
   }
 }
