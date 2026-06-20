@@ -11,12 +11,12 @@ import { UebungAnimation } from '../../components/UebungAnimation';
 const UEBUNG_ANIMATIONEN: Record<string, React.ComponentProps<typeof UebungAnimation>> = {
   'knie-01': {
     ausgang: {
-      front: require('../../assets/exercises/squat_active_front.png'),
-      seite: require('../../assets/exercises/squat_active.png'),
-    },
-    endposition: {
       front: require('../../assets/exercises/squat_standing_front.png'),
       seite: require('../../assets/exercises/squat_standing.png'),
+    },
+    endposition: {
+      front: require('../../assets/exercises/squat_active_front.png'),
+      seite: require('../../assets/exercises/squat_active.png'),
     },
   },
 };
