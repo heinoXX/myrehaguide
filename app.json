@@ -10,8 +10,12 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.myrehaguide.app",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": []
+      }
     },
+    "privacyPolicyUrl": "https://heinoxx.github.io/myrehaguide/datenschutz.html",
     "android": {
       "package": "com.myrehaguide.app",
       "versionCode": 1,
